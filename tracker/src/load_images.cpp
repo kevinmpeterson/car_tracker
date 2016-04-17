@@ -37,6 +37,8 @@ bool DirectoryImageLoader::initialize(
 	const std::string& directory, 
 	const std::string& regexp)
 {
+	// store list locally so that on error the function doesn't disturb the 
+	// current state
 	std::vector<path> localFileList;
 
 	try {
@@ -45,6 +47,7 @@ bool DirectoryImageLoader::initialize(
 			std::cerr << directory << " does not exist" << std::endl;
 			return false;
 		}
+
 		if(!is_directory(directory))
 		{
 			std::cerr << directory << " is not a directory" << std::endl;
@@ -52,20 +55,25 @@ bool DirectoryImageLoader::initialize(
 		}
 
 		path p(directory.c_str());
-		boost::smatch what;
 
+		// setup regex filter to chop out non-useful files
+		boost::smatch what;
 		boost::regex my_filter;
 		my_filter = boost::regex(regexp);
 
-		for(directory_iterator dirItr = directory_iterator(p); dirItr != directory_iterator(); ++dirItr)
+		// run through the files and check against the regular expression
+		for(directory_iterator dirItr = directory_iterator(p); 
+			dirItr != directory_iterator(); 
+			++dirItr)
 		{
-			if(!boost::regex_match(dirItr->path().filename().string(), what, my_filter))
+			if(!boost::regex_match(
+				dirItr->path().filename().string(), what, my_filter))
+			{
 				continue;
+			}
 
 			localFileList.push_back(*dirItr);
-
 		}
-		//copy(directory_iterator(p), directory_iterator(), back_inserter(localFileList));
 	}
 	catch (const filesystem_error& ex)
 	{
@@ -73,12 +81,18 @@ bool DirectoryImageLoader::initialize(
 		return false;
 	}
 
+	// if there are files, all is good
 	if(localFileList.size() > 0)
 	{
+		// some operating systems don't return sorted file lists 
+		// (for instance, linux via boost); sort the file list so it is in 
+		// alphabetical order
 		std::sort(localFileList.begin(), localFileList.end());
 		fileList_ = localFileList;
 		fileItr_ = fileList_.begin();
 	}
+	// if there weren't any files in the directory that matched the regular 
+	// expression, return false
 	else
 	{
 		std::cerr << "No files found in " << directory << std::endl;
@@ -90,22 +104,24 @@ bool DirectoryImageLoader::initialize(
 
 bool DirectoryImageLoader::getNextFrame(cv::Mat& frame) 
 {
-	if(fileList_.size() == 0 || fileItr_ == fileList_.end())
+	if(!framesAvailable())
+	{
 		return false;
-
-	std::cout << fileItr_->string() << std::endl;
+	}
 
 	frame = cv::imread((fileItr_->string()));
 	++fileItr_;
 
+	// empty container is an indication of opencv read error
 	if(!frame.data)
 		return false;
-	
+
 	return true;
 }
 
 bool DirectoryImageLoader::framesAvailable()
 {
+	// if at the end, or if there are no files, then return false
 	if(fileList_.size() == 0 || fileItr_ == fileList_.end())
 		return false;
 
