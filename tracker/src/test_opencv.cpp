@@ -22,9 +22,47 @@
 
 
 #include <iostream>
+#include <opencv2/highgui/highgui.hpp>
+#include <tracker/load_images.h>
 
 int main(int argc, char** argv)
 {
+	DirectoryImageLoader* loader = new DirectoryImageLoader();
+
+	if(argc <= 2)
+	{
+		std::cerr << "Usage: " << argv[0] << " <input_directory> <regexp>" << std::endl;
+		return -1;
+	}
+
+	std::string inputDir(argv[1]);
+	std::string regexp(argv[2]);
+
+	if(!loader->initialize(inputDir, regexp))
+	{
+		std::cerr << "Error loading " << inputDir << ". Exiting." << std::endl;
+		return -1;
+	}
+
+	cv::Mat currentFrame;
+	cv::namedWindow("image", cv::WINDOW_AUTOSIZE);
+
+	while(loader->framesAvailable())
+	{
+		if(!loader->getNextFrame(currentFrame))
+		{
+			std::cerr << "Error reading current frame" << std::endl;
+			continue;
+		}
+
+		if(!currentFrame.data)
+			std::cout << "No data..." << std::endl;
+
+		cv::namedWindow("image", cv::WINDOW_AUTOSIZE);
+		cv::imshow("image", currentFrame);
+		cv::waitKey(10);
+	}
+
 	std::cout << "Hello World" << std::endl;
 	return 0;
 }
