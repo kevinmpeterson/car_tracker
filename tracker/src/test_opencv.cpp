@@ -22,8 +22,13 @@
 
 
 #include <iostream>
+#include <eigen3/Eigen/Dense>
+
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/eigen.hpp>
+
 #include <tracker/load_images.h>
+#include <tracker/SRCDFTracker.h>
 
 int main(int argc, char** argv)
 {
@@ -46,6 +51,19 @@ int main(int argc, char** argv)
 
 	cv::Mat currentFrame;
 	cv::namedWindow("image", cv::WINDOW_AUTOSIZE);
+
+	cv::Rect roi(0, 0, 39, 63);
+	SRCDFTracker tracker;
+	if(loader->framesAvailable())
+	{
+		if(!loader->getNextFrame(currentFrame))
+		{
+			std::cerr << "Could not get first frame for initialization. Exiting." << std::endl;
+			return -1;
+		}
+
+		tracker.initializeTrack(currentFrame, roi);
+	}
 
 	while(loader->framesAvailable())
 	{
