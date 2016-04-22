@@ -42,7 +42,7 @@ class DirectoryImageLoader : public ImageLoader {
 public:
 	DirectoryImageLoader();
 
-	/*
+	/**
 		Initialize the loader with a list of files based on the directory and 
 		the regular expression. The regexp specifies which files to include 
 		and exclude. 
