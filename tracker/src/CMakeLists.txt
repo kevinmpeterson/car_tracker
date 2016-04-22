@@ -11,9 +11,24 @@ add_library(
 	load_images.cpp
 	)
 
+set(TRACKER_LIB_DEPENDS
+	${OpenCV_LIBRARIES}
+	)
+
+add_library(
+	tracker 
+	SRCDFTracker.cpp
+	FeatureUtilities.cpp
+	)
+
 target_link_libraries(
 	load_images
 	${LOAD_IMAGES_LIB_DEPENDS}
+	)
+
+target_link_libraries(
+	tracker
+	${TRACKER_LIB_DEPENDS}
 	)
 
 add_executable(
@@ -24,4 +39,5 @@ add_executable(
 target_link_libraries(
 	test_opencv 
 	load_images
+	tracker
 	)
