@@ -21,7 +21,7 @@
  */
 
 /**
-	SRCDFTracker implements a Spatially Regularized Correlation Filters for Visual 
+	SRDCFTracker implements a Spatially Regularized Correlation Filters for Visual 
 	Tracking [1]. This code is based off of the MATLAB implementation by Hager [2]. 
 
 
@@ -30,17 +30,25 @@
  */
 
 #ifndef __SRDCF_TRACKER_H__
-#define __SRCDF_TRACKER_H__
+#define __SRDCF_TRACKER_H__
 
 #include <opencv2/core/core.hpp>
 #include <eigen3/Eigen/Dense>
 
 Eigen::MatrixXd hanning(const int& numRows, const int& numCols);
 
-class SRCDFTracker
+struct SRDCFParams
+{
+	double searchAreaScale;
+	double cellSize;
+
+	SRDCFParams();
+};
+
+class SRDCFTracker
 {
 public:
-	SRCDFTracker();
+	SRDCFTracker();
 
 	/**
 		initializeTrack initializes a filter track from an image and a given region
@@ -55,8 +63,16 @@ public:
 		const cv::Rect& roi);
 
 private:
-	
-	Eigen::MatrixXd weightingWindow_;
+
+	Eigen::MatrixXd weightingWindow_;	// cosine weighting window for regularization
+	SRDCFParams params_;		// parameters for the filter
+
+	cv::Size initialTemplateSize_; 	// Size of the target window at initialization
+	cv::Size templateSize_;  		// Current size of the template
+	double templateScaleFactor_; 	// Multiplier to determine size of the search region
+
+	double templateCenterX_;
+	double templateCenterY_;
 
 };
 
