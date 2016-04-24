@@ -32,10 +32,10 @@
 #ifndef __SRDCF_TRACKER_H__
 #define __SRDCF_TRACKER_H__
 
+#include <vector>
 #include <opencv2/core/core.hpp>
 #include <eigen3/Eigen/Dense>
-
-Eigen::MatrixXd hanning(const int& numRows, const int& numCols);
+#include <tracker/FeatureUtilities.h>
 
 struct SRDCFParams
 {
@@ -49,6 +49,7 @@ class SRDCFTracker
 {
 public:
 	SRDCFTracker();
+	~SRDCFTracker();
 
 	/**
 		initializeTrack initializes a filter track from an image and a given region
@@ -74,6 +75,8 @@ private:
 	double templateCenterX_;
 	double templateCenterY_;
 
+
+	std::vector< FeatureProcessor* > featureProcessors_;
 };
 
 #endif

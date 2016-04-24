@@ -23,35 +23,13 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #include <tracker/SRCDFTracker.h>
+#include <tracker/FeatureUtilities.h>
+#include <tracker/ImageUtilities.h>
+
 #include <iostream>
 
 using namespace cv;
 using namespace Eigen;
-
-
-VectorXd hanning1d(const int& numPoints)
-{
-	VectorXd result = VectorXd::Zero(numPoints);
-
-	for(int wI = 0; wI < numPoints; ++wI)
-	{
-		result(wI) = 0.5 * (1 - cos(2 * M_PI * (wI / (double)numPoints)));
-	}
-
-	return result;
-}
-
-MatrixXd hanning(const int& numRows, const int& numCols)
-{
-	MatrixXd result;
-
-	MatrixXd hannCol =  hanning1d(numRows);
-	MatrixXd hannRow = (hanning1d(numCols)).transpose();
-
-	result = hannCol * hannRow;
-
-	return result;
-}
 
 SRDCFParams::SRDCFParams()
 {
@@ -61,38 +39,20 @@ SRDCFParams::SRDCFParams()
 
 SRDCFTracker::SRDCFTracker()
 {
+	FeatureParams featureParams;
+	featureParams.cellSize = params_.cellSize;
+
+	ColorFeatureProcessor* cfp = new ColorFeatureProcessor(featureParams);
+	featureProcessors_.push_back(cfp);
 }
 
-
-Rect cropROI(const Rect& roi, const Size& imSize)
+SRDCFTracker::~SRDCFTracker()
 {
-	Rect outROI = roi;
-
-	if(roi.x < 0)
+	for(int fI = 0; fI < featureProcessors_.size(); ++fI)
 	{
-		outROI.x = 0;
-		outROI.width = roi.width + roi.x;
+		delete featureProcessors_[fI];
 	}
-
-	if(roi.y < 0)
-	{
-		outROI.y = 0;
-		outROI.height = roi.height + roi.y;
-	}
-
-	if(outROI.x + outROI.width > imSize.width)
-	{
-		outROI.width = imSize.width - outROI.x;
-	}
-
-	if(outROI.y + outROI.height > imSize.height)
-	{
-		outROI.height = imSize.height - outROI.y;
-	}
-
-	return outROI;
 }
-
 
 void SRDCFTracker::initializeTrack(
 	const Mat& image,
@@ -125,14 +85,15 @@ void SRDCFTracker::initializeTrack(
 		initialTemplateSize_.width,
 		initialTemplateSize_.height);
 
-	Rect initTemplROICropped = cropROI(initialTemplateROI, image.size());
+	Mat templ = extractPatch(initialTemplateROI, image);
+	Mat target = extractPatch(targetROI, image);
 
-	std::cout << initialTemplateROI << std::endl;
-	std::cout << initTemplROICropped << std::endl;
-	std::cout << targetROI << std::endl;
+	//TODO: extend this beyond just the first feature set
+	Mat features;
+	featureProcessors_[0]->computeFeatureVector(templ, features);
 
-	Mat templ = image(initTemplROICropped);
-	Mat target = image(targetROI);
+	//Eigen::Map<MatrixXf> eigenT(features);
+
 
 	cv::namedWindow("template", cv::WINDOW_AUTOSIZE);
 	cv::imshow("template", templ);
@@ -142,9 +103,6 @@ void SRDCFTracker::initializeTrack(
 
 	cv::namedWindow("image", cv::WINDOW_AUTOSIZE);
 	cv::imshow("image", image);
-
-	cv::namedWindow("hanning", cv::WINDOW_AUTOSIZE);
-	cv::imshow("hanning", templ);
 
 	waitKey();
 	/*

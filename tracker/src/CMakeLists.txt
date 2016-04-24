@@ -19,6 +19,7 @@ add_library(
 	tracker 
 	SRCDFTracker.cpp
 	FeatureUtilities.cpp
+	ImageUtilities.cpp
 	)
 
 target_link_libraries(
