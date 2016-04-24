@@ -52,13 +52,13 @@ int main(int argc, char** argv)
 	cv::Mat currentFrame;
 	cv::namedWindow("image", cv::WINDOW_AUTOSIZE);
 
-	cv::Rect roi(0, 0, 39, 63);
-	SRCDFTracker tracker;
+	cv::Rect roi(6, 166, 43, 27);
+	SRDCFTracker tracker;
 	if(loader->framesAvailable())
 	{
 		if(!loader->getNextFrame(currentFrame))
 		{
-			std::cerr << "Could not get first frame for initialization. Exiting." << std::endl;
+			std::cerr << "Could not load first frame for initialization. Exiting." << std::endl;
 			return -1;
 		}
 
