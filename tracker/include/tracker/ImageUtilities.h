@@ -26,8 +26,8 @@
 #include <opencv2/core/core.hpp>
 #include <eigen3/Eigen/Dense>
 
-Eigen::VectorXd hanning1d(const int& numPoints);
-Eigen::MatrixXd hanning(const int& numRows, const int& numCols);
+cv::Mat hanning1d(const int& numPoints);
+cv::Mat hanning(const int& numRows, const int& numCols);
 cv::Rect cropROI(const cv::Rect& roi, const cv::Size& imSize);
 cv::Mat extractPatch(const cv::Rect& roi, const cv::Mat& image);
 

@@ -60,6 +60,10 @@ void ColorFeatureProcessor::computeFeatureVector(
 	{
 		patch.copyTo(featureOutput);
 	}
+
+	featureOutput.convertTo(featureOutput, CV_32F);
+	featureOutput = featureOutput / 255.0;
+
 	// TODO: Change this to integral image? (see average_feature_region.m)
 	resize(featureOutput, featureOutput, Size(0,0), 1./params_.cellSize, 1./params_.cellSize);
 }

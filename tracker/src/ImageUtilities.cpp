@@ -24,27 +24,27 @@
 using namespace cv;
 using namespace Eigen;
 
-VectorXd hanning1d(const int& numPoints)
+Mat hanning1d(const int& numPoints)
 {
-	VectorXd result = VectorXd::Zero(numPoints);
+	Mat result = Mat::zeros(numPoints, 1, CV_32F);
 
 	for(int wI = 0; wI < numPoints; ++wI)
 	{
-		result(wI) = 0.5 * (1 - cos(2 * M_PI * (wI / (double)numPoints)));
+		result.at<float>(wI, 1) = 0.5 * (1 - cos(2 * M_PI * (wI / (double)numPoints)));
 	}
 
 	return result;
 }
 
-MatrixXd hanning(const int& numRows, const int& numCols)
+Mat hanning(const int& numRows, const int& numCols)
 {
-	MatrixXd result;
+	Mat result;
 
-	MatrixXd hannCol =  hanning1d(numRows);
-	MatrixXd hannRow = (hanning1d(numCols)).transpose();
+	Mat hannCol =  hanning1d(numRows);
+	Mat hannRow = (hanning1d(numCols)).t();
 
 	result = hannCol * hannRow;
-
+	
 	return result;
 }
 

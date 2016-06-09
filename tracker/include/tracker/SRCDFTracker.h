@@ -41,6 +41,7 @@ struct SRDCFParams
 {
 	double searchAreaScale;
 	double cellSize;
+	double labelSigma;
 
 	SRDCFParams();
 };
@@ -65,7 +66,7 @@ public:
 
 private:
 
-	Eigen::MatrixXd weightingWindow_;	// cosine weighting window for regularization
+	cv::Mat weightingWindow_;	// cosine weighting window for regularization
 	SRDCFParams params_;		// parameters for the filter
 
 	cv::Size initialTemplateSize_; 	// Size of the target window at initialization
@@ -77,6 +78,8 @@ private:
 
 
 	std::vector< FeatureProcessor* > featureProcessors_;
+
+	cv::Mat computeFeatureMatrix(const cv::Mat& templ);
 };
 
 #endif
